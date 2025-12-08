@@ -145,8 +145,7 @@ var city_size_taskClock;
 var text;
 var choice_a_square;
 var choice_b_square;
-var choice_a_mouse;
-var choice_b_mouse;
+var choice_mouse;
 var choice_a_text;
 var choice_b_text;
 var post_quest2Clock;
@@ -239,6 +238,12 @@ async function experimentInit() {
   });
   
   wel_key_resp = new core.Keyboard({psychoJS: psychoJS, clock: new util.Clock(), waitForStart: true});
+  
+  // Declare globals so all later routines can see them
+  var cond;
+  var rowRange;
+  var intro_short;
+  var intro_long;
   
   // Initialize components for Routine "recognition"
   recognitionClock = new util.Clock();
@@ -376,14 +381,10 @@ async function experimentInit() {
     interpolate: true, 
   });
   
-  choice_a_mouse = new core.Mouse({
+  choice_mouse = new core.Mouse({
     win: psychoJS.window,
   });
-  choice_a_mouse.mouseClock = new util.Clock();
-  choice_b_mouse = new core.Mouse({
-    win: psychoJS.window,
-  });
-  choice_b_mouse.mouseClock = new util.Clock();
+  choice_mouse.mouseClock = new util.Clock();
   choice_a_text = new visual.TextStim({
     win: psychoJS.window,
     name: 'choice_a_text',
@@ -393,7 +394,7 @@ async function experimentInit() {
     pos: [(- 0.3), (- 0.2)], draggable: false, height: 0.05,  wrapWidth: undefined, ori: 0.0,
     languageStyle: 'LTR',
     color: new util.Color('white'),  opacity: undefined,
-    depth: -5.0 
+    depth: -4.0 
   });
   
   choice_b_text = new visual.TextStim({
@@ -405,7 +406,7 @@ async function experimentInit() {
     pos: [0.3, (- 0.2)], draggable: false, height: 0.05,  wrapWidth: undefined, ori: 0.0,
     languageStyle: 'LTR',
     color: new util.Color('white'),  opacity: undefined,
-    depth: -6.0 
+    depth: -5.0 
   });
   
   // Initialize components for Routine "post_quest2"
@@ -840,6 +841,7 @@ function emailRoutineEnd(snapshot) {
 
 var WelcomeMaxDurationReached;
 var _wel_key_resp_allKeys;
+var cond;
 var rowRange;
 var intro_short;
 var intro_long;
@@ -861,37 +863,38 @@ function WelcomeRoutineBegin(snapshot) {
     wel_key_resp.rt = undefined;
     _wel_key_resp_allKeys = [];
     // Run 'Begin Routine' code from code_2
-    // OPTION A: fixed condition
-    // let cond = 'globalHigh';
-    
     // OPTION B: random condition per participant
     let condOptions = ['globalHigh', 'globalLow', 'italyHigh', 'italyLow'];
-    let cond = condOptions[Math.floor(Math.random() * condOptions.length)];
+    cond = condOptions[Math.floor(Math.random() * condOptions.length)];
     
     // map each condition to row range (0-based indices)
     let cond_to_range = {
       'globalHigh': '0:300',
-      'globalLow': '300:600',
-      'italyHigh': '600:900',
-      'italyLow': '900:1200',
+      'globalLow':  '300:600',
+      'italyHigh':  '600:900',
+      'italyLow':   '900:1200',
     };
     rowRange = cond_to_range[cond];
     
-    // optional intros
+    // intro text mapping
     let intro_short_map = {
       'globalHigh': 'Which city has the larger population?',
       'globalLow':  'Which city has the larger population?',
       'italyHigh':  'Which city has the larger population?',
       'italyLow':   'Which city is at a higher elevation above sea level?',
     };
+    
     let intro_long_map = {
       'globalHigh': 'Now we will be moving onto the second half of this study. For this half of the study you will be tasked with identifying which of two presented cities has a higher population. These will be cities from the list you were just presented with. You will indicate which of the cities you believe has a higher population with a mouse click. When you are ready to begin this portion of the study please press the spacebar.',
       'globalLow':  'Now we will be moving onto the second half of this study. For this half of the study you will be tasked with identifying which of two presented cities has a higher population. These will be cities from the list you were just presented with. You will indicate which of the cities you believe has a higher population with a mouse click. When you are ready to begin this portion of the study please press the spacebar.',
       'italyHigh':  'Now we will be moving onto the second half of this study. For this half of the study you will be tasked with identifying which of two presented cities has a higher population. These will be cities from the list you were just presented with. You will indicate which of the cities you believe has a higher population with a mouse click. When you are ready to begin this portion of the study please press the spacebar.',
       'italyLow':   'Now we will be moving onto the second half of this study. For this half of the study you will be tasked with identifying which of two presented cities is higher above sea level. These will be cities from the list you were just presented with. You will indicate which of the cities you believe is higher above sea level (in feet) with a mouse click. When you are ready to begin this portion of the study please press the spacebar.',
     };
+    
     intro_short = intro_short_map[cond];
     intro_long = intro_long_map[cond];
+    
+    
     
     psychoJS.experiment.addData('Welcome.started', globalClock.getTime());
     WelcomeMaxDuration = null
@@ -1255,16 +1258,29 @@ function recognitionRoutineEachFrame() {
                   rec_mouse.clicked_name.push(obj.name);
               }
           }
-          if (!gotValidClick) {
-              rec_mouse.clicked_name.push(null);
+          // check if the mouse was inside our 'clickable' objects
+          gotValidClick = false;
+          rec_mouse.clickableObjects = eval([rec_square, no_rec_square])
+          ;// make sure the mouse's clickable objects are an array
+          if (!Array.isArray(rec_mouse.clickableObjects)) {
+              rec_mouse.clickableObjects = [rec_mouse.clickableObjects];
           }
-          _mouseXYs = rec_mouse.getPos();
-          rec_mouse.x.push(_mouseXYs[0]);
-          rec_mouse.y.push(_mouseXYs[1]);
-          rec_mouse.leftButton.push(_mouseButtons[0]);
-          rec_mouse.midButton.push(_mouseButtons[1]);
-          rec_mouse.rightButton.push(_mouseButtons[2]);
-          rec_mouse.time.push(rec_mouse.mouseClock.getTime());
+          // iterate through clickable objects and check each
+          for (const obj of rec_mouse.clickableObjects) {
+              if (obj.contains(rec_mouse)) {
+                  gotValidClick = true;
+                  rec_mouse.clicked_name.push(obj.name);
+              }
+          }
+          if (gotValidClick === true) { 
+            _mouseXYs = rec_mouse.getPos();
+            rec_mouse.x.push(_mouseXYs[0]);
+            rec_mouse.y.push(_mouseXYs[1]);
+            rec_mouse.leftButton.push(_mouseButtons[0]);
+            rec_mouse.midButton.push(_mouseButtons[1]);
+            rec_mouse.rightButton.push(_mouseButtons[2]);
+            rec_mouse.time.push(rec_mouse.mouseClock.getTime());
+          }
           if (gotValidClick === true) { // end routine on response
             continueRoutine = false;
           }
@@ -1318,6 +1334,7 @@ function recognitionRoutineEachFrame() {
 }
 
 
+var recog_resp;
 function recognitionRoutineEnd(snapshot) {
   return async function () {
     //--- Ending Routine 'recognition' ---
@@ -1335,6 +1352,34 @@ function recognitionRoutineEnd(snapshot) {
     psychoJS.experiment.addData('rec_mouse.rightButton', rec_mouse.rightButton);
     psychoJS.experiment.addData('rec_mouse.time', rec_mouse.time);
     psychoJS.experiment.addData('rec_mouse.clicked_name', rec_mouse.clicked_name);
+    
+    // Run 'End Routine' code from code_3
+    // default
+    recog_resp = -1;
+    
+    // only act if clicked_name exists and is non-empty
+    if (typeof rec_mouse.clicked_name !== 'undefined' &&
+        rec_mouse.clicked_name !== null &&
+        rec_mouse.clicked_name.length > 0) {
+    
+      if (rec_mouse.clicked_name.includes('rec_square')) {
+        recog_resp = 1;
+      } else if (rec_mouse.clicked_name.includes('no_rec_square')) {
+        recog_resp = 0;
+      }
+    }
+    
+    // clean RT safely
+    let rt_clean = (typeof rec_mouse.rt !== 'undefined' &&
+                    rec_mouse.rt !== null &&
+                    rec_mouse.rt.length > 0)
+                   ? rec_mouse.rt[0]
+                   : null;
+    
+    // save just the response + RT
+    psychoJS.experiment.addData('recog_resp', recog_resp);
+    psychoJS.experiment.addData('rt_clean', rt_clean);
+    
     
     // the Routine "recognition" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset();
@@ -1502,25 +1547,15 @@ function city_size_taskRoutineBegin(snapshot) {
     city_size_taskMaxDurationReached = false;
     // update component parameters for each repeat
     text.setText(intro_short);
-    // setup some python lists for storing info about the choice_a_mouse
+    // setup some python lists for storing info about the choice_mouse
     // current position of the mouse:
-    choice_a_mouse.x = [];
-    choice_a_mouse.y = [];
-    choice_a_mouse.leftButton = [];
-    choice_a_mouse.midButton = [];
-    choice_a_mouse.rightButton = [];
-    choice_a_mouse.time = [];
-    choice_a_mouse.clicked_name = [];
-    gotValidClick = false; // until a click is received
-    // setup some python lists for storing info about the choice_b_mouse
-    // current position of the mouse:
-    choice_b_mouse.x = [];
-    choice_b_mouse.y = [];
-    choice_b_mouse.leftButton = [];
-    choice_b_mouse.midButton = [];
-    choice_b_mouse.rightButton = [];
-    choice_b_mouse.time = [];
-    choice_b_mouse.clicked_name = [];
+    choice_mouse.x = [];
+    choice_mouse.y = [];
+    choice_mouse.leftButton = [];
+    choice_mouse.midButton = [];
+    choice_mouse.rightButton = [];
+    choice_mouse.time = [];
+    choice_mouse.clicked_name = [];
     gotValidClick = false; // until a click is received
     choice_a_text.setText(cityA);
     choice_b_text.setText(cityB);
@@ -1531,8 +1566,7 @@ function city_size_taskRoutineBegin(snapshot) {
     city_size_taskComponents.push(text);
     city_size_taskComponents.push(choice_a_square);
     city_size_taskComponents.push(choice_b_square);
-    city_size_taskComponents.push(choice_a_mouse);
-    city_size_taskComponents.push(choice_b_mouse);
+    city_size_taskComponents.push(choice_mouse);
     city_size_taskComponents.push(choice_a_text);
     city_size_taskComponents.push(choice_b_text);
     
@@ -1582,90 +1616,58 @@ function city_size_taskRoutineEachFrame() {
       choice_b_square.setAutoDraw(true);
     }
     
-    // *choice_a_mouse* updates
-    if (t >= 0.0 && choice_a_mouse.status === PsychoJS.Status.NOT_STARTED) {
+    // *choice_mouse* updates
+    if (t >= 0.0 && choice_mouse.status === PsychoJS.Status.NOT_STARTED) {
       // keep track of start time/frame for later
-      choice_a_mouse.tStart = t;  // (not accounting for frame time here)
-      choice_a_mouse.frameNStart = frameN;  // exact frame index
+      choice_mouse.tStart = t;  // (not accounting for frame time here)
+      choice_mouse.frameNStart = frameN;  // exact frame index
       
-      choice_a_mouse.status = PsychoJS.Status.STARTED;
-      choice_a_mouse.mouseClock.reset();
-      prevButtonState = choice_a_mouse.getPressed();  // if button is down already this ISN'T a new click
+      choice_mouse.status = PsychoJS.Status.STARTED;
+      choice_mouse.mouseClock.reset();
+      prevButtonState = choice_mouse.getPressed();  // if button is down already this ISN'T a new click
       }
-    if (choice_a_mouse.status === PsychoJS.Status.STARTED) {  // only update if started and not finished!
-      _mouseButtons = choice_a_mouse.getPressed();
+    if (choice_mouse.status === PsychoJS.Status.STARTED) {  // only update if started and not finished!
+      _mouseButtons = choice_mouse.getPressed();
       if (!_mouseButtons.every( (e,i,) => (e == prevButtonState[i]) )) { // button state changed?
         prevButtonState = _mouseButtons;
         if (_mouseButtons.reduce( (e, acc) => (e+acc) ) > 0) { // state changed to a new click
           // check if the mouse was inside our 'clickable' objects
           gotValidClick = false;
-          choice_a_mouse.clickableObjects = eval(choice_a_square)
+          choice_mouse.clickableObjects = eval([choice_a_square, choice_b_square])
           ;// make sure the mouse's clickable objects are an array
-          if (!Array.isArray(choice_a_mouse.clickableObjects)) {
-              choice_a_mouse.clickableObjects = [choice_a_mouse.clickableObjects];
+          if (!Array.isArray(choice_mouse.clickableObjects)) {
+              choice_mouse.clickableObjects = [choice_mouse.clickableObjects];
           }
           // iterate through clickable objects and check each
-          for (const obj of choice_a_mouse.clickableObjects) {
-              if (obj.contains(choice_a_mouse)) {
+          for (const obj of choice_mouse.clickableObjects) {
+              if (obj.contains(choice_mouse)) {
                   gotValidClick = true;
-                  choice_a_mouse.clicked_name.push(obj.name);
+                  choice_mouse.clicked_name.push(obj.name);
               }
           }
-          if (!gotValidClick) {
-              choice_a_mouse.clicked_name.push(null);
-          }
-          _mouseXYs = choice_a_mouse.getPos();
-          choice_a_mouse.x.push(_mouseXYs[0]);
-          choice_a_mouse.y.push(_mouseXYs[1]);
-          choice_a_mouse.leftButton.push(_mouseButtons[0]);
-          choice_a_mouse.midButton.push(_mouseButtons[1]);
-          choice_a_mouse.rightButton.push(_mouseButtons[2]);
-          choice_a_mouse.time.push(choice_a_mouse.mouseClock.getTime());
-          if (gotValidClick === true) { // end routine on response
-            continueRoutine = false;
-          }
-        }
-      }
-    }
-    // *choice_b_mouse* updates
-    if (t >= 0.0 && choice_b_mouse.status === PsychoJS.Status.NOT_STARTED) {
-      // keep track of start time/frame for later
-      choice_b_mouse.tStart = t;  // (not accounting for frame time here)
-      choice_b_mouse.frameNStart = frameN;  // exact frame index
-      
-      choice_b_mouse.status = PsychoJS.Status.STARTED;
-      choice_b_mouse.mouseClock.reset();
-      prevButtonState = choice_b_mouse.getPressed();  // if button is down already this ISN'T a new click
-      }
-    if (choice_b_mouse.status === PsychoJS.Status.STARTED) {  // only update if started and not finished!
-      _mouseButtons = choice_b_mouse.getPressed();
-      if (!_mouseButtons.every( (e,i,) => (e == prevButtonState[i]) )) { // button state changed?
-        prevButtonState = _mouseButtons;
-        if (_mouseButtons.reduce( (e, acc) => (e+acc) ) > 0) { // state changed to a new click
           // check if the mouse was inside our 'clickable' objects
           gotValidClick = false;
-          choice_b_mouse.clickableObjects = eval(choice_b_square)
+          choice_mouse.clickableObjects = eval([choice_a_square, choice_b_square])
           ;// make sure the mouse's clickable objects are an array
-          if (!Array.isArray(choice_b_mouse.clickableObjects)) {
-              choice_b_mouse.clickableObjects = [choice_b_mouse.clickableObjects];
+          if (!Array.isArray(choice_mouse.clickableObjects)) {
+              choice_mouse.clickableObjects = [choice_mouse.clickableObjects];
           }
           // iterate through clickable objects and check each
-          for (const obj of choice_b_mouse.clickableObjects) {
-              if (obj.contains(choice_b_mouse)) {
+          for (const obj of choice_mouse.clickableObjects) {
+              if (obj.contains(choice_mouse)) {
                   gotValidClick = true;
-                  choice_b_mouse.clicked_name.push(obj.name);
+                  choice_mouse.clicked_name.push(obj.name);
               }
           }
-          if (!gotValidClick) {
-              choice_b_mouse.clicked_name.push(null);
+          if (gotValidClick === true) { 
+            _mouseXYs = choice_mouse.getPos();
+            choice_mouse.x.push(_mouseXYs[0]);
+            choice_mouse.y.push(_mouseXYs[1]);
+            choice_mouse.leftButton.push(_mouseButtons[0]);
+            choice_mouse.midButton.push(_mouseButtons[1]);
+            choice_mouse.rightButton.push(_mouseButtons[2]);
+            choice_mouse.time.push(choice_mouse.mouseClock.getTime());
           }
-          _mouseXYs = choice_b_mouse.getPos();
-          choice_b_mouse.x.push(_mouseXYs[0]);
-          choice_b_mouse.y.push(_mouseXYs[1]);
-          choice_b_mouse.leftButton.push(_mouseButtons[0]);
-          choice_b_mouse.midButton.push(_mouseButtons[1]);
-          choice_b_mouse.rightButton.push(_mouseButtons[2]);
-          choice_b_mouse.time.push(choice_b_mouse.mouseClock.getTime());
           if (gotValidClick === true) { // end routine on response
             continueRoutine = false;
           }
@@ -1719,6 +1721,8 @@ function city_size_taskRoutineEachFrame() {
 }
 
 
+var a_resp;
+var b_resp;
 function city_size_taskRoutineEnd(snapshot) {
   return async function () {
     //--- Ending Routine 'city_size_task' ---
@@ -1729,22 +1733,44 @@ function city_size_taskRoutineEnd(snapshot) {
     });
     psychoJS.experiment.addData('city_size_task.stopped', globalClock.getTime());
     // store data for psychoJS.experiment (ExperimentHandler)
-    psychoJS.experiment.addData('choice_a_mouse.x', choice_a_mouse.x);
-    psychoJS.experiment.addData('choice_a_mouse.y', choice_a_mouse.y);
-    psychoJS.experiment.addData('choice_a_mouse.leftButton', choice_a_mouse.leftButton);
-    psychoJS.experiment.addData('choice_a_mouse.midButton', choice_a_mouse.midButton);
-    psychoJS.experiment.addData('choice_a_mouse.rightButton', choice_a_mouse.rightButton);
-    psychoJS.experiment.addData('choice_a_mouse.time', choice_a_mouse.time);
-    psychoJS.experiment.addData('choice_a_mouse.clicked_name', choice_a_mouse.clicked_name);
+    psychoJS.experiment.addData('choice_mouse.x', choice_mouse.x);
+    psychoJS.experiment.addData('choice_mouse.y', choice_mouse.y);
+    psychoJS.experiment.addData('choice_mouse.leftButton', choice_mouse.leftButton);
+    psychoJS.experiment.addData('choice_mouse.midButton', choice_mouse.midButton);
+    psychoJS.experiment.addData('choice_mouse.rightButton', choice_mouse.rightButton);
+    psychoJS.experiment.addData('choice_mouse.time', choice_mouse.time);
+    psychoJS.experiment.addData('choice_mouse.clicked_name', choice_mouse.clicked_name);
     
-    // store data for psychoJS.experiment (ExperimentHandler)
-    psychoJS.experiment.addData('choice_b_mouse.x', choice_b_mouse.x);
-    psychoJS.experiment.addData('choice_b_mouse.y', choice_b_mouse.y);
-    psychoJS.experiment.addData('choice_b_mouse.leftButton', choice_b_mouse.leftButton);
-    psychoJS.experiment.addData('choice_b_mouse.midButton', choice_b_mouse.midButton);
-    psychoJS.experiment.addData('choice_b_mouse.rightButton', choice_b_mouse.rightButton);
-    psychoJS.experiment.addData('choice_b_mouse.time', choice_b_mouse.time);
-    psychoJS.experiment.addData('choice_b_mouse.clicked_name', choice_b_mouse.clicked_name);
+    // Run 'End Routine' code from code_4
+    // defaults
+    a_resp = -1;
+    b_resp = -1;
+    
+    // proceed only if clicked_name exists and is non-empty
+    if (typeof choice_mouse.clicked_name !== 'undefined' &&
+        choice_mouse.clicked_name !== null &&
+        choice_mouse.clicked_name.length > 0) {
+    
+      if (choice_mouse.clicked_name.includes('choice_a_square')) {
+        a_resp = 1;
+        b_resp = 0;
+      } else if (choice_mouse.clicked_name.includes('choice_b_square')) {
+        a_resp = 0;
+        b_resp = 1;
+      }
+    }
+    
+    // clean RT safely
+    let rt_clean_size = (typeof choice_mouse.rt !== 'undefined' &&
+                         choice_mouse.rt !== null &&
+                         choice_mouse.rt.length > 0)
+                        ? choice_mouse.rt[0]
+                        : null;
+    
+    // save just responses + RT
+    psychoJS.experiment.addData('a_resp', a_resp);
+    psychoJS.experiment.addData('b_resp', b_resp);
+    psychoJS.experiment.addData('rt_clean_size', rt_clean_size);
     
     // the Routine "city_size_task" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset();
