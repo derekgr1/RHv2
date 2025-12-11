@@ -1232,7 +1232,7 @@ function recognitionRoutineEachFrame() {
     }
     
     // *rec_mouse* updates
-    if (t >= 0.0 && rec_mouse.status === PsychoJS.Status.NOT_STARTED) {
+    if (t >= 0.6 && rec_mouse.status === PsychoJS.Status.NOT_STARTED) {
       // keep track of start time/frame for later
       rec_mouse.tStart = t;  // (not accounting for frame time here)
       rec_mouse.frameNStart = frameN;  // exact frame index
@@ -1617,7 +1617,7 @@ function city_size_taskRoutineEachFrame() {
     }
     
     // *choice_mouse* updates
-    if (t >= 0.0 && choice_mouse.status === PsychoJS.Status.NOT_STARTED) {
+    if (t >= 0.6 && choice_mouse.status === PsychoJS.Status.NOT_STARTED) {
       // keep track of start time/frame for later
       choice_mouse.tStart = t;  // (not accounting for frame time here)
       choice_mouse.frameNStart = frameN;  // exact frame index
