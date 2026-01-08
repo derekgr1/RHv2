@@ -159,8 +159,6 @@ var consent_3;
 var consent_rec;
 var cont_mouse3;
 var consent_button;
-var no_consent_rec;
-var no_consent_button;
 var do_your_bestClock;
 var do_your_best_text;
 var key_resp;
@@ -210,7 +208,7 @@ async function experimentInit() {
   consent_p = new visual.TextStim({
     win: psychoJS.window,
     name: 'consent_p',
-    text: 'Following this screen you will be presented with 3 pages of a consent form. It is very important you read the text in its entirety. If you do not consent, the experiment will be immediately exited. \n\nIf you are ready to continue please press the space bar.  ',
+    text: 'Following this screen you will be presented with 3 pages of a consent form. It is very important you read the text in its entirety. If after reading the form you do not wish to continue with the experiment, please exit the window (if you are in full screen hit esp, then close the window).\n\nIf you are ready to continue please press the space bar.  ',
     font: 'Arial',
     units: undefined, 
     pos: [0, 0], draggable: false, height: 0.05,  wrapWidth: undefined, ori: 0.0,
@@ -220,15 +218,6 @@ async function experimentInit() {
   });
   
   key_resp_5 = new core.Keyboard({psychoJS: psychoJS, clock: new util.Clock(), waitForStart: true});
-  
-  // Run 'Begin Experiment' code from code_5
-  // track which pages were shown
-  var sawConsentP1 = false;
-  var sawConsentP2 = false;
-  var sawConsentP3 = false;
-  
-  // store final decision
-  var consent = null;  // 1 = yes, 0 = no
   
   // Initialize components for Routine "consent_pt1"
   consent_pt1Clock = new util.Clock();
@@ -340,7 +329,7 @@ async function experimentInit() {
     win: psychoJS.window, name: 'consent_rec', 
     width: [0.35, 0.1][0], height: [0.35, 0.1][1],
     ori: 0.0, 
-    pos: [(- 0.2), (- 0.4)], 
+    pos: [0, (- 0.4)], 
     draggable: false, 
     anchor: 'center', 
     lineWidth: 1.0, 
@@ -362,38 +351,10 @@ async function experimentInit() {
     text: 'I consent',
     font: 'Arial',
     units: undefined, 
-    pos: [(- 0.2), (- 0.4)], draggable: false, height: 0.05,  wrapWidth: undefined, ori: 0.0,
+    pos: [0, (- 0.4)], draggable: false, height: 0.05,  wrapWidth: undefined, ori: 0.0,
     languageStyle: 'LTR',
     color: new util.Color([(- 1.0), (- 1.0), (- 1.0)]),  opacity: undefined,
     depth: -3.0 
-  });
-  
-  no_consent_rec = new visual.Rect ({
-    win: psychoJS.window, name: 'no_consent_rec', 
-    width: [0.35, 0.1][0], height: [0.35, 0.1][1],
-    ori: 0.0, 
-    pos: [0.2, (- 0.4)], 
-    draggable: false, 
-    anchor: 'center', 
-    lineWidth: 1.0, 
-    lineColor: new util.Color('white'), 
-    fillColor: new util.Color('white'), 
-    colorSpace: 'rgb', 
-    opacity: undefined, 
-    depth: -4, 
-    interpolate: true, 
-  });
-  
-  no_consent_button = new visual.TextStim({
-    win: psychoJS.window,
-    name: 'no_consent_button',
-    text: 'I do not consent',
-    font: 'Arial',
-    units: undefined, 
-    pos: [0.2, (- 0.4)], draggable: false, height: 0.04,  wrapWidth: undefined, ori: 0.0,
-    languageStyle: 'LTR',
-    color: new util.Color([(- 1.0), (- 1.0), (- 1.0)]),  opacity: undefined,
-    depth: -5.0 
   });
   
   // Initialize components for Routine "do_your_best"
@@ -920,7 +881,6 @@ function consent_prepRoutineEnd(snapshot) {
 
 var consent_pt1MaxDurationReached;
 var gotValidClick;
-var sawConsentP1;
 var consent_pt1MaxDuration;
 var consent_pt1Components;
 function consent_pt1RoutineBegin(snapshot) {
@@ -945,9 +905,6 @@ function consent_pt1RoutineBegin(snapshot) {
     cont_mouse1.time = [];
     cont_mouse1.clicked_name = [];
     gotValidClick = false; // until a click is received
-    // Run 'Begin Routine' code from code_6
-    sawConsentP1 = true;
-    
     psychoJS.experiment.addData('consent_pt1.started', globalClock.getTime());
     consent_pt1MaxDuration = null
     // keep track of which components have finished
@@ -1108,7 +1065,6 @@ function consent_pt1RoutineEnd(snapshot) {
 
 
 var consent_pt2MaxDurationReached;
-var sawConsentP2;
 var consent_pt2MaxDuration;
 var consent_pt2Components;
 function consent_pt2RoutineBegin(snapshot) {
@@ -1133,9 +1089,6 @@ function consent_pt2RoutineBegin(snapshot) {
     cont_mouse2.time = [];
     cont_mouse2.clicked_name = [];
     gotValidClick = false; // until a click is received
-    // Run 'Begin Routine' code from code_7
-    sawConsentP2 = true;
-    
     psychoJS.experiment.addData('consent_pt2.started', globalClock.getTime());
     consent_pt2MaxDuration = null
     // keep track of which components have finished
@@ -1293,7 +1246,6 @@ function consent_pt2RoutineEnd(snapshot) {
 
 
 var consent_pt3MaxDurationReached;
-var sawConsentP3;
 var consent_pt3MaxDuration;
 var consent_pt3Components;
 function consent_pt3RoutineBegin(snapshot) {
@@ -1318,9 +1270,6 @@ function consent_pt3RoutineBegin(snapshot) {
     cont_mouse3.time = [];
     cont_mouse3.clicked_name = [];
     gotValidClick = false; // until a click is received
-    // Run 'Begin Routine' code from code_8
-    sawConsentP3 = true;
-    
     psychoJS.experiment.addData('consent_pt3.started', globalClock.getTime());
     consent_pt3MaxDuration = null
     // keep track of which components have finished
@@ -1329,8 +1278,6 @@ function consent_pt3RoutineBegin(snapshot) {
     consent_pt3Components.push(consent_rec);
     consent_pt3Components.push(cont_mouse3);
     consent_pt3Components.push(consent_button);
-    consent_pt3Components.push(no_consent_rec);
-    consent_pt3Components.push(no_consent_button);
     
     for (const thisComponent of consent_pt3Components)
       if ('status' in thisComponent)
@@ -1384,7 +1331,7 @@ function consent_pt3RoutineEachFrame() {
         if (_mouseButtons.reduce( (e, acc) => (e+acc) ) > 0) { // state changed to a new click
           // check if the mouse was inside our 'clickable' objects
           gotValidClick = false;
-          cont_mouse3.clickableObjects = eval([consent_rec, no_consent_rec])
+          cont_mouse3.clickableObjects = eval(consent_rec)
           ;// make sure the mouse's clickable objects are an array
           if (!Array.isArray(cont_mouse3.clickableObjects)) {
               cont_mouse3.clickableObjects = [cont_mouse3.clickableObjects];
@@ -1422,26 +1369,6 @@ function consent_pt3RoutineEachFrame() {
       consent_button.setAutoDraw(true);
     }
     
-    
-    // *no_consent_rec* updates
-    if (t >= 0.0 && no_consent_rec.status === PsychoJS.Status.NOT_STARTED) {
-      // keep track of start time/frame for later
-      no_consent_rec.tStart = t;  // (not accounting for frame time here)
-      no_consent_rec.frameNStart = frameN;  // exact frame index
-      
-      no_consent_rec.setAutoDraw(true);
-    }
-    
-    
-    // *no_consent_button* updates
-    if (t >= 0.0 && no_consent_button.status === PsychoJS.Status.NOT_STARTED) {
-      // keep track of start time/frame for later
-      no_consent_button.tStart = t;  // (not accounting for frame time here)
-      no_consent_button.frameNStart = frameN;  // exact frame index
-      
-      no_consent_button.setAutoDraw(true);
-    }
-    
     // check for quit (typically the Esc key)
     if (psychoJS.experiment.experimentEnded || psychoJS.eventManager.getKeys({keyList:['escape']}).length > 0) {
       return quitPsychoJS('The [Escape] key was pressed. Goodbye!', false);
@@ -1469,7 +1396,6 @@ function consent_pt3RoutineEachFrame() {
 }
 
 
-var consent;
 function consent_pt3RoutineEnd(snapshot) {
   return async function () {
     //--- Ending Routine 'consent_pt3' ---
@@ -1487,34 +1413,6 @@ function consent_pt3RoutineEnd(snapshot) {
     psychoJS.experiment.addData('cont_mouse3.rightButton', cont_mouse3.rightButton);
     psychoJS.experiment.addData('cont_mouse3.time', cont_mouse3.time);
     psychoJS.experiment.addData('cont_mouse3.clicked_name', cont_mouse3.clicked_name);
-    
-    // Run 'End Routine' code from code_8
-    consent = null;
-    
-    if (typeof cont_mouse3.clicked_name !== 'undefined' &&
-        cont_mouse3.clicked_name !== null &&
-        cont_mouse3.clicked_name.length > 0) {
-    
-      // must have seen all pages
-      if (sawConsentP1 && sawConsentP2 && sawConsentP3) {
-        if (cont_mouse3.clicked_name.includes('btn_yes')) {
-          consent = 1;
-        } else if (cont_mouse3.clicked_name.includes('btn_no')) {
-          consent = 0;
-        }
-      }
-    }
-    
-    // save consent
-    psychoJS.experiment.addData('consent', consent);
-    psychoJS.experiment.addData('sawConsentP1', sawConsentP1);
-    psychoJS.experiment.addData('sawConsentP2', sawConsentP2);
-    psychoJS.experiment.addData('sawConsentP3', sawConsentP3);
-    
-    // if they clicked "no", end experiment immediately
-    if (consent === 0) {
-      psychoJS.quit('The participant did not consent.', false);
-    }
     
     // the Routine "consent_pt3" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset();
